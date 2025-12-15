@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react'
+import React, {useState, useEffect, useCallback} from 'react'
 /**
  * @returns {{pets: Pet[], addPet: function, addMedication: function, deletePet: function, isReady: boolean}}
  */
@@ -9,12 +9,12 @@ import React, {useState, useEffect} from 'react'
  */
 const generateId = () => 'id-' + Math.random().toString(36).substring(2, 9);
 
+/**
+ * @returns {{pets: Pet[], addPet: function, addMedication: function, deletePet: function, isReady: boolean}}
+ */
 const usePetData = () => {
   const [pets, setPets] = useState([]);
   const [isReady, setIsReady] = useState(false);
-
-  
-
   // Load data from localStorage on mount
   useEffect(() => {
     try {
@@ -39,16 +39,16 @@ const usePetData = () => {
   /**
    * @param {Omit<Pet, 'id' | 'medications'>} newPet
    */
-  const addPet = (newPet) => {
+  const addPet = useCallback((newPet) => {
     const petToAdd = { ...newPet, id: generateId(), medications: [] };
     setPets(prev => [...prev, petToAdd]);
-  };
+  }, []);
 
   /**
    * @param {string} petId
    * @param {Omit<Medication, 'id'>} newMedication
    */
-  const addMedication = (petId, newMedication) => {
+  const addMedication = useCallback((petId, newMedication) => {
     const medicationToAdd = { ...newMedication, id: generateId() };
     setPets(prev => prev.map(pet =>
       pet.id === petId
@@ -58,14 +58,14 @@ const usePetData = () => {
           }
         : pet
     ));
-  };
+  }, []);
 
   /**
    * @param {string} petId
    */
-  const deletePet = (petId) => {
+  const deletePet = useCallback((petId) => {
     setPets(prev => prev.filter(p => p.id !== petId));
-  };
+  }, []);
 
   return { pets, addPet, addMedication, deletePet, isReady };
 };

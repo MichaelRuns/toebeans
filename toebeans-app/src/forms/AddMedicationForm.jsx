@@ -10,8 +10,8 @@ const AddMedicationForm = ({ pet, onAdd, onCancel }) => {
   const [formData, setFormData] = useState({
     name: '',
     doseForm: 'Liquid',
-    doseAmount: '',
-    doseUnit: 'mg',
+    dosagePerKgValue: '',
+    dosageUnitPerKg: 'mg',
     frequency: 'Once daily',
     concentrationValue: '',
     concentrationMassUnit: 'g',
@@ -42,7 +42,7 @@ const AddMedicationForm = ({ pet, onAdd, onCancel }) => {
   const handleSubmit = (e) => {
     e.preventDefault();
     onAdd(pet.id, formData);
-    onCancel();
+    onCancel(); // Close form immediately after successful state update
   };
 
   return (
@@ -77,29 +77,31 @@ const AddMedicationForm = ({ pet, onAdd, onCancel }) => {
 
 
         <div className="section-box section-box-blue">
-          <h3 className="section-title text-indigo">Required Dose (Prescription)</h3>
+          <h3 className="section-title text-indigo">Required Dosage (Prescription)</h3>
+          <p className="text-note">Dosage is required per kilogram of pet weight (e.g., 5 mg/kg)</p>
           <div className="flex-row-spaced">
             <div className="flex-col-half">
-              <label htmlFor="doseAmount" className="input-label">Amount</label>
-              <div className="input-field-wrapper-split">
+              <label htmlFor="dosagePerKgValue" className="input-label">Mass Value per Kg</label>
+              <div className="input-field-wrapper-split-unit-compact">
                 <input
                   type="number"
-                  name="doseAmount"
-                  id="doseAmount"
-                  value={formData.doseAmount}
+                  name="dosagePerKgValue"
+                  id="dosagePerKgValue"
+                  value={formData.dosagePerKgValue}
                   onChange={handleChange}
                   required
-                  min="0.1"
-                  step="0.1"
-                  className="input-field input-field-split"
-                  placeholder="25"
+                  min="0.001"
+                  step="0.001"
+                  className="input-field input-field-split-compact"
+                  placeholder="5.0"
                 />
                 <UnitSelect
-                  name="doseUnit"
-                  value={formData.doseUnit}
+                  name="dosageUnitPerKg"
+                  value={formData.dosageUnitPerKg}
                   onChange={handleChange}
                   options={massOptions}
                 />
+                <div className="unit-label-compact">/ kg</div>
               </div>
             </div>
             <div className="flex-col-half">
@@ -165,7 +167,7 @@ const AddMedicationForm = ({ pet, onAdd, onCancel }) => {
         {doseForm === 'Pill' && (
             <div className="section-box section-box-purple">
                 <h3 className="section-title text-purple">Pill Size (Tablet/Capsule Label)</h3>
-                <p className="text-note">e.g., 100 mg per tablet</p>
+                <p className="text-note">e.g., 100 mg per tablet. Unit must match the prescribed dose unit.</p>
                 <div className="input-group">
                     <label htmlFor="tabletSize" className="input-label">
                         Mass Per Unit (e.g., 100) <span className="text-danger">*</span>
@@ -184,8 +186,8 @@ const AddMedicationForm = ({ pet, onAdd, onCancel }) => {
                             placeholder="100"
                         />
                         <UnitSelect
-                            name="doseUnit"
-                            value={formData.doseUnit}
+                            name="dosageUnitPerKg" // This is reused to specify the mass unit of the pill/tablet
+                            value={formData.dosageUnitPerKg}
                             onChange={handleChange}
                             options={massOptions}
                         />

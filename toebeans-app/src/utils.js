@@ -37,19 +37,37 @@ export const convertToBaseUnit = (value, fromUnit, type) => {
 /**
  * Calculates the required volume (ml) or number of units (tablets) to administer.
  * @param {Medication} medication
+ * @param {Pet} pet
  * @returns {DosageResult}
  */
-export const calculateDosage = (medication) => {
-  const { doseAmount, doseUnit, doseForm, concentrationValue, concentrationMassUnit, concentrationVolumeUnit, tabletSize } = medication;
+export const calculateDosage = (medication, pet) => {
+  const { doseForm, dosagePerKgValue, dosageUnitPerKg, concentrationValue, concentrationMassUnit, concentrationVolumeUnit, tabletSize } = medication;
+  
+  const dosagePerKgNum = parseFloat(dosagePerKgValue);
+  const petWeightNum = parseFloat(pet.weight);
 
-  const doseAmountNum = parseFloat(doseAmount);
-
-  if (isNaN(doseAmountNum) || doseAmountNum <= 0) {
-    return { result: 0, unit: doseForm === 'Pill' ? 'tablets' : 'ml', error: "" };
+  // --- Step 1: Input Validation ---
+  if (isNaN(dosagePerKgNum) || dosagePerKgNum <= 0) {
+    return { result: 0, unit: doseForm === 'Pill' ? 'tablets' : 'ml', error: "Dosage per kg is invalid." };
+  }
+  if (isNaN(petWeightNum) || petWeightNum <= 0) {
+    return { result: 0, unit: doseForm === 'Pill' ? 'tablets' : 'ml', error: "Pet weight is invalid." };
   }
 
-  // 1. Convert required dose to base mass unit (mg)
-  const doseMassMg = convertToBaseUnit(doseAmountNum, doseUnit, 'mass');
+  // --- Step 2: Calculate Pet Mass in Base Unit (kg) ---
+  const petMassKg = convertToBaseUnit(petWeightNum, pet.weightUnit, 'petWeight');
+  if (petMassKg <= 0) {
+    return { result: 0, unit: doseForm === 'Pill' ? 'tablets' : 'ml', error: "Pet weight conversion failed." };
+  }
+
+  // --- Step 3: Calculate Total Required Drug Mass in Base Unit (mg) ---
+  // Convert the required dose (e.g., 5 mg) part of the mg/kg to mg
+  const requiredDoseMg = convertToBaseUnit(dosagePerKgNum, dosageUnitPerKg, 'mass');
+  
+  // Total required dose mass (mg) = (Required Dose Mass per Kg) * (Pet Weight in Kg)
+  const totalMassDoseMg = requiredDoseMg * petMassKg;
+
+  // --- Step 4: Calculate Administration Amount (Volume or Units) ---
 
   if (doseForm === 'Liquid' && concentrationValue && concentrationMassUnit && concentrationVolumeUnit) {
     const concValueNum = parseFloat(concentrationValue);
@@ -57,18 +75,18 @@ export const calculateDosage = (medication) => {
         return { result: 0, unit: 'ml', error: "Concentration mass value is invalid." };
     }
 
-    // 2. Convert concentration mass part to base mass unit (mg)
+    // Convert concentration mass part (e.g., 5g) to base mass unit (mg)
     const concMassMg = convertToBaseUnit(concValueNum, concentrationMassUnit, 'mass');
 
-    // 3. Ensure concentration volume unit is correct (e.g., 1 ml or 1 L)
+    // Ensure concentration volume unit (e.g., 1ml) is converted to ml (base volume unit)
     const concVolumeMl = convertToBaseUnit(1, concentrationVolumeUnit, 'volume');
 
     if (concMassMg === 0) {
       return { result: 0, unit: 'ml', error: "Concentration mass cannot be zero." };
     }
 
-    // 4. Calculate the required volume in milliliters (ml)
-    const requiredVolumeMl = (doseMassMg / concMassMg) * concVolumeMl;
+    // Required Volume (ml) = (Total Mass Dose Mg / Concentration Mass Mg) * Concentration Volume Ml
+    const requiredVolumeMl = (totalMassDoseMg / concMassMg) * concVolumeMl;
 
     if (isNaN(requiredVolumeMl) || requiredVolumeMl < 0) {
       return { result: 0, unit: 'ml', error: "Calculation failed. Check all number inputs." };
@@ -82,15 +100,16 @@ export const calculateDosage = (medication) => {
       return { result: 0, unit: 'tablets', error: "Tablet size value is invalid." };
     }
 
-    // 2. Convert tablet size to base mass unit (mg).
-    const tabletSizeMg = convertToBaseUnit(tabletSizeNum, doseUnit, 'mass');
+    // Convert tablet size (e.g., 100 mg/unit) to base mass unit (mg/unit).
+    // The dosageUnitPerKg is reused here to specify the mass unit of the tablet size.
+    const tabletSizeMg = convertToBaseUnit(tabletSizeNum, dosageUnitPerKg, 'mass'); 
 
     if (tabletSizeMg === 0) {
       return { result: 0, unit: 'tablets', error: "Tablet size cannot be zero." };
     }
 
-    // 3. Calculate the required number of units (tablets/capsules)
-    const requiredUnits = doseMassMg / tabletSizeMg;
+    // Required Units = Total Mass Dose Mg / Tablet Size Mg
+    const requiredUnits = totalMassDoseMg / tabletSizeMg;
 
     if (isNaN(requiredUnits) || requiredUnits < 0) {
       return { result: 0, unit: 'tablets', error: "Calculation failed. Check all number inputs." };
