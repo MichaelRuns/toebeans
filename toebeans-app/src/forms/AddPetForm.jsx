@@ -1,6 +1,7 @@
 import InputField from "../components/InputField";
 import Button from "../components/Button";
 import UnitSelect from "../components/UnitSelect";
+import { useState } from "react";
 
 /**
  * @param {{onAdd: function, onCancel: function}} props
