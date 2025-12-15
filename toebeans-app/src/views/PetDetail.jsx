@@ -4,13 +4,11 @@ import AddMedicationForm from "../forms/AddMedicationForm";
 import Button from "../components/Button";
 import { convertToBaseUnit } from "../utils";
 import {useState, useMemo} from 'react'
-import usePetData from "../hooks/usePetData";
 /**
- * @param {{pet: Pet, onBack: function, onDelete: function}} props
+ * @param {{pet: Pet, onBack: function, onDelete: function, addMedication: function}} props
  */
-const PetDetail = ({ pet, onBack, onDelete }) => {
+const PetDetail = ({ pet, onBack, onDelete, addMedication}) => {
   const [showAddMedForm, setShowAddMedForm] = useState(false);
-  const { addMedication } = usePetData(); // Only use the function needed
 
   // Calculate pet weight in kg for display consistency
   const petWeightKg = useMemo(() => {
@@ -65,7 +63,7 @@ const PetDetail = ({ pet, onBack, onDelete }) => {
 
       <div className="space-y-4">
         {pet.medications.length > 0 ? (
-          pet.medications.map(med => <MedicationCard key={med.id} medication={med} />)
+          pet.medications.map(med => <MedicationCard key={med.id} medication={med} pet={pet} />)
         ) : (
           <div className="empty-state">
             No medications added for {pet.name}. Add one to calculate a dose!

@@ -67,6 +67,7 @@ const App = () => {
                 deletePet(id);
                 handleBackToPetList();
               }}
+              addMedication={addMedication}
             />
           ) : (
             <PetList
