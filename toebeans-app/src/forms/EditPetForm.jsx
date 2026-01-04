@@ -4,10 +4,15 @@ import UnitSelect from "../components/UnitSelect";
 import { useState } from "react";
 
 /**
- * @param {{onAdd: function, onCancel: function}} props
+ * @param {{pet: Pet, onSave: function, onCancel: function}} props
  */
-const AddPetForm = ({ onAdd, onCancel }) => {
-  const [formData, setFormData] = useState({ name: '', species: '', weight: '', weightUnit: 'kg' });
+const EditPetForm = ({ pet, onSave, onCancel }) => {
+  const [formData, setFormData] = useState({
+    name: pet.name,
+    species: pet.species,
+    weight: pet.weight,
+    weightUnit: pet.weightUnit
+  });
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -16,7 +21,7 @@ const AddPetForm = ({ onAdd, onCancel }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onAdd(formData);
+    onSave(pet.id, formData);
     onCancel();
   };
 
@@ -28,7 +33,7 @@ const AddPetForm = ({ onAdd, onCancel }) => {
 
   return (
     <div className="card form-card">
-      <h2 className="form-title">New Furry Friend</h2>
+      <h2 className="form-title">Edit {pet.name}</h2>
       <form onSubmit={handleSubmit}>
         <InputField
           label="Name"
@@ -59,7 +64,6 @@ const AddPetForm = ({ onAdd, onCancel }) => {
               min="0.1"
               step="0.1"
               className="input-field input-field-split"
-              placeholder="0.0"
             />
             <UnitSelect
               name="weightUnit"
@@ -71,11 +75,12 @@ const AddPetForm = ({ onAdd, onCancel }) => {
         </div>
 
         <div className="form-actions">
-          <Button type="submit" className="flex-1" onClick={() => {}}>Add Pet</Button>
+          <Button type="submit" className="flex-1">Save Changes</Button>
           <Button onClick={onCancel} color="red" className="flex-1">Cancel</Button>
         </div>
       </form>
     </div>
   );
 };
-export default AddPetForm
+
+export default EditPetForm;

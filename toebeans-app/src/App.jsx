@@ -11,7 +11,18 @@ import PetList from './views/PetList'
 // --- Main Application Component ---
 
 const App = () => {
-  const { pets, addPet, addMedication, deletePet, isReady } = usePetData();
+  const {
+    pets,
+    addPet,
+    updatePet,
+    deletePet,
+    addMedication,
+    updateMedication,
+    deleteMedication,
+    recordAdministration,
+    clearAdministrationHistory,
+    isReady
+  } = usePetData();
   const [activePetId, setActivePetId] = useState(null);
   const [showAddPetForm, setShowAddPetForm] = useState(false);
 
@@ -68,6 +79,11 @@ const App = () => {
                 handleBackToPetList();
               }}
               addMedication={addMedication}
+              updatePet={updatePet}
+              updateMedication={updateMedication}
+              deleteMedication={deleteMedication}
+              recordAdministration={recordAdministration}
+              clearAdministrationHistory={clearAdministrationHistory}
             />
           ) : (
             <PetList

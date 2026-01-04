@@ -4,7 +4,7 @@ import Button from "../components/Button";
  * @param {{pets: Pet[], onSelectPet: function, onAddPet: function}} props
  */
 const PetList = ({ pets, onSelectPet, onAddPet }) => (
-  <div className="page-padding space-y-4">
+  <div className="page-padding space-y-4 page-enter">
     <div className="list-header">
       <h1 className="detail-title">Your ToeBeans</h1>
       <Button onClick={onAddPet} className="btn-small btn-secondary btn-shadow">

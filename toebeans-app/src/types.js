@@ -22,6 +22,12 @@
  * @property {string} [concentrationMassUnit] - Liquid: Mass unit in concentration (e.g., g)
  * @property {string} [concentrationVolumeUnit] - Liquid: Volume unit in concentration (e.g., ml)
  * * @property {string} [tabletSize] - Pill: Mass per unit (e.g., 100)
+ * @property {AdministrationRecord[]} [administrationHistory] - Array of administration timestamps
+ */
+
+/**
+ * @typedef {object} AdministrationRecord
+ * @property {string} timestamp - ISO 8601 date string
  */
 
 /**
